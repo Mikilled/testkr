@@ -1,4 +1,5 @@
 import itertools
+import re
 
 import docx
 
@@ -53,39 +54,7 @@ def get_data_from_line(num,doc):
     block = iter_block_items(doc)
 
 
-#функция сбора данных для заполнения титульника
-def get_user_data(str):
-    if 'факультет' in str.lower():
-        print(str)
-    elif 'кафедра' in str.lower():
-        print(str)
-    elif 'практик' in str.lower():
-        print(str)
-    # elif ('тема' in str.lower() or "«" in str.lower() or '"' in str.lower() or "'" in str.lower()):
-    #     print(str)
-    elif 'дисциплин' in str.lower():
-        print(str)
-    elif 'вариант' in str.lower():
-        print(str)
-    elif 'выполнил' in str.lower():
-        print(str)
-    elif 'проверил' in str.lower():
-        print(str)
-    else:
-        return
 
-
-
-info = {
-    'факультет': "",
-    "кафедра": "",
-    "тип": "",
-    "тема": "",
-    "дисциплина": "",
-    "вариант": "",
-    "выполнил": "",
-    "проверил": "",
-}
 import docx
 #doc = docx.Document('test.docx')
 # print(next(itertools.islice(iter_block_items(doc), 25, None)).text)
@@ -93,13 +62,15 @@ import docx
 #
 doc = docx.Document('test.docx')
 count = 0
+text = ''
 for i, block in enumerate(iter_block_items(doc)):
     if count == 30:
         break
     # Ваш код для обработки блока
     count += 1
     if isinstance(block,Paragraph):
-        get_user_data(block.text)
+        text +=block.text
+        #get_user_data(block.text)
        #print(block.text)
         #print("paragraph\n")
     else:
@@ -107,7 +78,15 @@ for i, block in enumerate(iter_block_items(doc)):
             for cell in row.cells:
               #print(cell.text)
                 #print("table\n")
-              get_user_data(cell.text)
+              text += cell.text
+              #get_user_data(cell.text)
+
+
+pattern = r"\b[А-Я]{2,3}-\d{2,3}\b"
+match = re.search(pattern, text)
+if match:
+    print(match.group(0))
+
 
 
 
