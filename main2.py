@@ -1,5 +1,6 @@
 import spacy
 import re
+import docx
 from docx.document import Document
 from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
@@ -26,7 +27,8 @@ def find_name(text):
     doc = nlp(text)
     names = [ent.text for ent in doc.ents if ent.label_ == "PER"]
     if names:
-        print(re.split('\n|\t', ' '.join(names)))
+        names_tit.append(re.split('\n|\t', ' '.join(names)))
+        #print(re.split('\n|\t', ' '.join(names)))
         return True
     return False
 
@@ -35,34 +37,51 @@ def find_group(text):
     match = re.search(pattern, text)
     if match:
         print(match.group(0))
+        info['группа'] = match.group(0)
         return True
     return False
 def find_lab(text):
     pattern = r'((?:[Пп]о\s)?[Пп]рактик[ае]\s№\d+|(?:по\s)?[Лл]абораторн[ао][яй]\sработ[ае]\s№?\d+)'
     match = re.search(pattern, text)
     if match:
-        print(match.group(0))
+        info['тип'] = match.group(0)
         return True
     return False
 def find_varkaf(text):
     pattern = r'(Вариант\s\d+)|(Кафедра|Факультет\s)|((?:По\s)?[Дд]исциплин[ае]:?\s*(.*))|((?:По\s)?[Тт]ем[ае]:?\s*(.*))'
-    match = re.search(pattern, text)
+    match = re.search(r'(Вариант\s\d+)', text)
     if match:
-        print(text)
-        # print(match.group(0))
+        info['вариант'] = text
+        return True
+    match = re.search(r'([Кк]афедра|[Фф]акультет\s)', text)
+    if match:
+        if "афедра" in text:
+            info['кафедра'] = text
+        if "акультет" in text:
+            info['факультет'] = text
+        return True
+    match = re.search(r'(?:По\s)?[Дд]исциплин[ае]:?\s*(.*)', text)
+    if match:
+        info['дисциплина'] = text
+        return True
+    match = re.search(r'[\'"«»,](?!.*_)(.*?)[\'"«»,]', text)
+    if match:
+        info['тема'] = text
         return True
     return False
 def find_group(text):
-    pattern = r'[\'"«»,](.*?)[\'"«»,]'
+    pattern = r"\b[А-Я]{2,3}-\d{2,3}\b"
     match = re.search(pattern, text)
     if match:
-        print(match.group(0))
+        info['группа'] = text
         return True
     return False
 
 
 def pars_info(text):
     if find_name(text):
+        if find_group(text):
+            return
         return
     if find_group(text):
         return
@@ -72,8 +91,25 @@ def pars_info(text):
         return
 
 
-import docx
 
+
+
+info = {
+    'факультет': "",
+    "кафедра": "",
+    "тип": "",
+    "тема": "",
+    "дисциплина": "",
+    "вариант": "",
+    'группа':"",
+    "выполнил": "",
+    "проверил": "",
+}
+
+
+
+
+names_tit = []
 nlp = spacy.load("ru_core_news_sm")
 doc = docx.Document(r"test.docx")
 count = 0
@@ -93,4 +129,8 @@ for i, block in enumerate(iter_block_items(doc)):
                 pars_info(cell.text)
                 text += cell.text
 
+info['проверил'] = names_tit[-1]
+info['выполнил'] = names_tit[0]
 
+
+print(info)
