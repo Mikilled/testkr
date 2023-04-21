@@ -111,7 +111,7 @@ info = {
 
 names_tit = []
 nlp = spacy.load("ru_core_news_sm")
-doc = docx.Document(r"test.docx")
+doc = docx.Document(r"form.docx")
 count = 0
 text = ''
 for i, block in enumerate(iter_block_items(doc)):
