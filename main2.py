@@ -53,14 +53,22 @@ def find_varkaf(text):
     if match:
         info['вариант'] = text
         return True
-    match = re.search(r'([Кк]афедра|[Фф]акультет\s)', text)
+    match = re.search(r'[Кк]афедра|[Фф]акультет\s.*', text)
     if match:
-        if "афедра" in text:
-            info['кафедра'] = text
-        if "акультет" in text:
-            info['факультет'] = text
+        if "\n" in text:
+            line = text.split("\n")
+            for i in line:
+                if "афедра" in i:
+                    info['кафедра'] = i
+                if "акультет" in i:
+                    info['факультет'] = i
+        else:
+            if "афедра" in text:
+                info['кафедра'] = text
+            if "акультет" in text:
+                info['факультет'] = text
         return True
-    match = re.search(r'(?:По\s)?[Дд]исциплин[ае]:?\s*(.*)', text)
+    match = re.search(r'(?:[Пп]о\s)?[Дд]исциплин[ае]:?\s*(.*)', text)
     if match:
         info['дисциплина'] = text
         return True
@@ -71,24 +79,24 @@ def find_varkaf(text):
     return False
 def find_group(text):
     pattern = r"\b[А-Я]{2,3}-\d{2,3}\b"
-    match = re.search(pattern, text)
+    match = re.findall(pattern, text)
     if match:
-        info['группа'] = text
+        info['группа'] = ''.join(match)
         return True
     return False
 
 
 def pars_info(text):
-    if find_name(text):
-        if find_group(text):
-            return
-        return
-    if find_group(text):
-        return
-    if find_lab(text):
-        return
-    if find_varkaf(text):
-        return
+    find_name(text)
+    find_group(text)
+
+
+    find_group(text)
+
+    find_lab(text)
+
+    find_varkaf(text)
+
 
 
 
@@ -111,7 +119,7 @@ info = {
 
 names_tit = []
 nlp = spacy.load("ru_core_news_sm")
-doc = docx.Document(r"form.docx")
+doc = docx.Document(r"testwrite.docx")
 count = 0
 text = ''
 for i, block in enumerate(iter_block_items(doc)):
@@ -119,8 +127,8 @@ for i, block in enumerate(iter_block_items(doc)):
         break
     count += 1
     if isinstance(block,Paragraph):
-        pars_info(block.text)
-
+        c = block.text
+        pars_info(c)
         text +=block.text
 
     else:
