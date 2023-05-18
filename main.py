@@ -60,16 +60,18 @@ import docx
 # print(next(itertools.islice(iter_block_items(doc), 25, None)).text)
 # get_user_data(next(itertools.islice(iter_block_items(doc), 16, None)).text)
 #
-doc = docx.Document('test.docx')
+doc = docx.Document('test-txt.docx')
 count = 0
 text = ''
 for i, block in enumerate(iter_block_items(doc)):
-    if count == 30:
+    if count == 4:
         break
     # Ваш код для обработки блока
     count += 1
     if isinstance(block,Paragraph):
-        text +=block.text
+        if 'Heading' in Paragraph.style.name:
+            print('Заголовок:', Paragraph.text)
+        text +=block.text+'\n'
         #get_user_data(block.text)
        #print(block.text)
         #print("paragraph\n")
@@ -82,11 +84,7 @@ for i, block in enumerate(iter_block_items(doc)):
               #get_user_data(cell.text)
 
 
-pattern = r"\b[А-Я]{2,3}-\d{2,3}\b"
-match = re.search(pattern, text)
-if match:
-    print(match.group(0))
-
+print(text)
 
 
 
