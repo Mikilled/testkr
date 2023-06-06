@@ -1,5 +1,3 @@
-from functools import reduce
-
 import spacy
 import re
 import docx
@@ -8,7 +6,6 @@ from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
 from docx.table import _Cell, Table
 from docx.text.paragraph import Paragraph
-import operator
 
 
 def pars_titul(doc_name):
@@ -49,8 +46,7 @@ def pars_titul(doc_name):
         return False
 
 
-    def find_varkaf(text):
-        pattern = r'(Вариант\s\d+)|(Кафедра|Факультет\s)|((?:По\s)?[Дд]исциплин[ае]:?\s*(.*))|((?:По\s)?[Тт]ем[ае]:?\s*(.*))'
+    def find_info(text):
         match = re.search(r'(Вариант\s\d+)', text)
         if match:
             info['вариант'] = text
@@ -61,10 +57,8 @@ def pars_titul(doc_name):
             return True
         match = re.findall(r"\b[А-Я]{2,3}-\d{2,3}\b", text)
         if match:
-            #print(match)
             info['группа'] = ', '.join(match)
             return True
-        pattern = r'((?:[Пп]о\s)?[Пп]рактик[ае]\s№\d+|(?:по\s)?[Лл]абораторн[ао][яй]\sработ[ае]\s№?\d+)'
         match = re.search('((?:[Пп]о\s)?[Пп]рактик[ае]\s№\d+|(?:[Пп]о\s)?[Лл]абораторн[ао][яй]\sработ[ае]\s№?\d+|(?:[Пп]о\s)?[Пп]рактическ[ао][яй]\sработ[ае]\s№?\d+)', text)
         if match:
             info['тип'] = match.group(0)
@@ -79,7 +73,7 @@ def pars_titul(doc_name):
 
     def pars_info(text,table):
         for i in text.split('\n'):
-            find_varkaf(i)
+            find_info(i)
             find_name(i,table)
 
 
@@ -105,7 +99,7 @@ def pars_titul(doc_name):
     for block in iter_block_items(doc):
 
         if count == 30 or ((isinstance(block, Paragraph))and(('овосибирск' in block.text) or('202' in block.text))):
-            # Ваш код дальше
+
             if '202' not in block.text:
                 continue
             count += 1
@@ -121,7 +115,6 @@ def pars_titul(doc_name):
                 for cell in row.cells:
                     c = cell.text
                     pars_info(c,True)
-                    #print(f"{cell.text} ------1---1---1----1---1---")
                     text += cell.text
         count += 1
 
@@ -141,5 +134,5 @@ def pars_titul(doc_name):
 
 
 if __name__ == '__main__':
-    pars_titul(r"C:\Users\admin\Downloads\Otchyot_po_P_1_Poduto_E_I__ABs-123.docx")
+    pars_titul(r"C:\Users\admin\Downloads\Otchyot3.docx")
 

@@ -1,20 +1,14 @@
 import re
 import docx
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.document import Document
-from docx.oxml.table import CT_Tbl
-from docx.oxml.text.paragraph import CT_P
-from docx.table import _Cell, Table
-from docx.text.paragraph import Paragraph
 from docx.shared import Pt
 from docx.shared import Cm
 from docx.shared import Inches
-from docx.enum.text import WD_LINE_SPACING
 import calendar
-from datetime import datetime
-from telebot import *
+
+import datetime
 import locale
+from telebot import *
 from parstitul import pars_titul
 locale.setlocale(
     category=locale.LC_ALL,
@@ -25,20 +19,17 @@ locale.setlocale(
 def write_titul(name_file,info):
     name_vuz = 'МИНИСТЕРСТВО НАУКИ И ВЫСШЕГО ОБРАЗОВАНИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ\n\nФЕДЕРАЛЬНОЕ ГОСУДАРСТВЕННОЕ БЮДЖЕТНОЕ\nОБРАЗОВАТЕЛЬНОЕ УЧРЕЖДЕНИЕ\nВЫСШЕГО ОБРАЗОВАНИЯ\n«НОВОСИБИРСКИЙ ГОСУДАРСТВЕННЫЙ ТЕХНИЧЕСКИЙ УНИВЕРСИТЕТ»\n___________________________________________________________________________'
     doc = docx.Document()
-    # создаем параграф
+
     p = doc.add_paragraph()
 
     section = doc.sections[0]
 
-    # задаем отступы
     section.left_margin = Cm(2.54)
     section.right_margin = Cm(2.54)
     #section.top_margin = Cm(2.54)
     #section.bottom_margin = Cm(2.54)
 
 
-
-    # добавляем текст в параграф и устанавливаем выравнивание по центру
     run = p.add_run(name_vuz )
     p.alignment = 1 # for left, 1 for center, 2 right, 3 justify
     font = run.font
@@ -71,7 +62,7 @@ def write_titul(name_file,info):
     font.bold = True
 
 
-    run = p.add_run(f'{info["тема"]}\n')
+    run = p.add_run(f'{info["тема"][:2].upper()+info["тема"][2:].lower()}\n')
     font = run.font
     font.name = 'Times New Roman'
     font.size = Pt(14)
@@ -101,39 +92,29 @@ def write_titul(name_file,info):
 
 
     def set_cell_border(cell: _Cell, **kwargs): #https://www.programmersought.com/article/74085524416/
-        """
-        Set cell`s border
-        Usage:
-        set_cell_border(
-            cell,
-            top={"sz": 12, "val": "single", "color": "#FF0000", "space": "0"},
-            bottom={"sz": 12, "color": "#00FF00", "val": "single"},
-            start={"sz": 24, "val": "dashed", "shadow": "true"},
-            end={"sz": 12, "val": "dashed"},
-        )
-        """
+
         tc = cell._tc
         tcPr = tc.get_or_add_tcPr()
 
-        # check for tag existnace, if none found, then create one
+
         tcBorders = tcPr.first_child_found_in("w:tcBorders")
         if tcBorders is None:
             tcBorders = OxmlElement('w:tcBorders')
             tcPr.append(tcBorders)
 
-        # list over all available tags
+
         for edge in ('start', 'top', 'end', 'bottom', 'insideH', 'insideV'):
             edge_data = kwargs.get(edge)
             if edge_data:
                 tag = 'w:{}'.format(edge)
 
-                # check for tag existnace, if none found, then create one
+
                 element = tcBorders.find(qn(tag))
                 if element is None:
                     element = OxmlElement(tag)
                     tcBorders.append(element)
 
-                # looks like order of attributes is important
+
                 for key in ["sz", "val", "color", "space", "shadow"]:
                     if key in edge_data:
                         element.set(qn('w:{}'.format(key)), str(edge_data[key]))
@@ -221,15 +202,15 @@ def write_titul(name_file,info):
     font = run.font
     font.name = 'Times New Roman'
     font.size = Pt(12)
-    doc.add_page_break()
+    # doc.add_page_break()
     doc.save(name_file)
 
-
+    print(info)
     return  doc
 
 
 if __name__ == '__main__':
-    count,info =pars_titul(r"C:\Users\admin\Downloads\Otchyot_po_P_1_Poduto_E_I__ABs-123.docx")
+    count,info =pars_titul(r"C:\Users\admin\Downloads\Otchyot.docx")
     print(count)
     doc = write_titul("testwrite.docx",info)
     doc.save('testwrite.docx')

@@ -9,7 +9,7 @@ from docx.table import Table
 from PIL import Image
 
 def iter_block_items(parent):
-    if isinstance(parent, docx.document.Document):  # Исправленное условие
+    if isinstance(parent, docx.document.Document):
         parent_elm = parent.element.body
     elif isinstance(parent, docx.oxml.table.CT_Tbl):
         parent_elm = parent
@@ -38,22 +38,6 @@ def save_text(paragraph,new_paragraph):
         new_run.font.color.rgb = RGBColor(0, 0, 0)
     is_list = paragraph.style.name
     print(is_list)
-
-
-
-
-from docx.oxml import OxmlElement
-
-# def get_image_size(doc, rId):
-#     rel = doc.part.rels[rId]
-#     image_part = rel.target_part
-#     width = image_part.image.width
-#     height = image_part.image.height
-#     width_inch = float(width) / 914400 * Inches(1)
-#     height_inch = float(height) / 914400 * Inches(1)
-#     print(width_inch, height_inch)
-#     return width_inch, height_inch
-
 
 
 
